@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model favourite {
+  id            Int        @default(autoincrement())
+  ingredient_id Int
+  user_id       Int
+  ingredient    ingredient @relation(fields: [ingredient_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_favourite_ingredient")
+  user          user       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_favourite_user1")
+
+  @@id([id, ingredient_id, user_id])
+  @@index([ingredient_id], map: "fk_favourite_ingredient_idx")
+  @@index([user_id], map: "fk_favourite_user1_idx")
+}
+
+model ingredient {
+  id                    Int                     @id @default(autoincrement())
+  name                  String?                 @db.VarChar(45)
+  type                  String?                 @db.VarChar(45)
+  unit                  String?                 @db.VarChar(45)
+  favourite             favourite[]
+  list                  list[]
+  receip_has_ingredient receip_has_ingredient[]
+}
+
+model list {
+  id            Int        @default(autoincrement())
+  ingredient_id Int
+  user_id       Int
+  ingredient    ingredient @relation(fields: [ingredient_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_list_ingredient1")
+  user          user       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_list_user1")
+
+  @@id([id, ingredient_id, user_id])
+  @@index([ingredient_id], map: "fk_list_ingredient1_idx")
+  @@index([user_id], map: "fk_list_user1_idx")
+}
+
+model receip {
+  id                    Int                     @id @default(autoincrement())
+  name                  String                  @db.VarChar(125)
+  img                   String?                 @db.VarChar(255)
+  url                   String?                 @db.VarChar(255)
+  receip_has_ingredient receip_has_ingredient[]
+}
+
+model receip_has_ingredient {
+  receip_id     Int
+  ingredient_id Int
+  ingredient    ingredient @relation(fields: [ingredient_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_receip_has_ingredient_ingredient1")
+  receip        receip     @relation(fields: [receip_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_receip_has_ingredient_receip1")
+
+  @@id([receip_id, ingredient_id])
+  @@index([ingredient_id], map: "fk_receip_has_ingredient_ingredient1_idx")
+  @@index([receip_id], map: "fk_receip_has_ingredient_receip1_idx")
+}
+
+model user {
+  id        Int         @id @default(autoincrement())
+  username  String      @db.VarChar(45)
+  paswword  String      @db.VarChar(45)
+  role      String      @db.VarChar(45)
+  avatar    String?     @db.VarChar(255)
+  favourite favourite[]
+  list      list[]
+}
